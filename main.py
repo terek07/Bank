@@ -38,7 +38,16 @@ class SavingsAccount(Account):
         return 0
 
     def __str__(self):
-        return f"Saving account owned by {self.owner}. Account balance is {self.balance}"
+        return (
+            "=== Savings Account ===\n"
+            f"ID: {self.id}\n"
+            f"Owner: {self.owner}\n"
+            f"Balance: {self.balance}\n"
+            f"Capitalization period: {self.capitalization_period}\n"
+            f"Annual interest rate: {self.annual_interest_rate}\n"
+            f"Withdrawal limit: {self.withdrawal_limit}"
+        )
+
 
 class CheckingAccount(Account):
     def __init__(self, id, owner, withdrawal_limit, overdraft_limit):
@@ -53,7 +62,15 @@ class CheckingAccount(Account):
         return 0
 
     def __str__(self):
-        return f"Checking account owned by {self.owner}. Account balance is {self.balance}"
+        return (
+            "=== Checking Account ===\n"
+            f"ID: {self.id}\n"
+            f"Owner: {self.owner}\n"
+            f"Balance: {self.balance}\n"
+            f"Withdrawal limit: {self.withdrawal_limit}\n"
+            f"Overdraft limit: {self.overdraft_limit}"
+        )
+
 
 class Transaction:
     def __init__(self, transaction_type, amount, source_account, target_account=None):
@@ -116,14 +133,14 @@ if __name__ == "__main__":
         choice = input("Choose option: ")
 
         if choice == "1":
-            acc_type = input("Enter account type (checking/savings): ").strip().lower()
+            acc_type = input("Enter account type (checking/savings) (1/2) : ").strip().lower()
             owner = input("Enter owner name: ")
-            if acc_type == "checking":
+            if acc_type == "checking" or acc_type == "1" :
                 wl = int(input("Withdrawal limit: "))
                 od = int(input("Overdraft limit: "))
                 acc = bank.create_account("checking", owner, withdrawal_limit=wl, overdraft_limit=od)
-            elif acc_type == "savings":
-                cp = int(input("Capitalization period: "))
+            elif acc_type == "savings"  or acc_type == "2":
+                cp = int(input("Capitalization period (in days): "))
                 rate = float(input("Annual interest rate: "))
                 wl = int(input("Withdrawal limit: "))
                 acc = bank.create_account("savings", owner, capitalization_period=cp, annual_interest_rate=rate, withdrawal_limit=wl)
@@ -131,7 +148,7 @@ if __name__ == "__main__":
                 print("Invalid account type")
                 continue
             if acc:
-                print("Created:", acc.__str__())
+                print("Created:", acc)
 
         elif choice == "2":
             acc_id = int(input("Account ID: "))
