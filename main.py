@@ -38,7 +38,7 @@ class SavingsAccount(Account):
         return 0
 
     def __str__(self):
-        return f"This is saving account owned by {self.owner}. Account balance is {self.balance}"
+        return f"Saving account owned by {self.owner}. Account balance is {self.balance}"
 
 class CheckingAccount(Account):
     def __init__(self, id, owner, withdrawal_limit, overdraft_limit):
@@ -53,7 +53,7 @@ class CheckingAccount(Account):
         return 0
 
     def __str__(self):
-        return f"This is checking account owned by {self.owner}. Account balance is {self.balance}"
+        return f"Checking account owned by {self.owner}. Account balance is {self.balance}"
 
 class Transaction:
     def __init__(self, transaction_type, amount, source_account, target_account=None):
@@ -62,9 +62,10 @@ class Transaction:
         self.source_account = source_account
         self.target_account = target_account
         self.timestamp = datetime.now()
+
     def __str__(self):
         target = f" to {self.target_account.owner}" if self.target_account else ""
-        return f"This is transaction made by {self.source_account.owner}{target}. Transaction type is {self.transaction_type}. Amount is {self.amount}"
+        return f"Transaction made by {self.source_account.owner}{target}. Transaction type is {self.transaction_type}. Amount is {self.amount}"
 
 
 class Bank:
@@ -72,6 +73,7 @@ class Bank:
     def __init__(self):
         self.accounts = {}
         self.transactions = []
+
     def create_account(self,account_type, owner_name, **kwargs):
         account = None
         if account_type == "checking":
@@ -82,9 +84,7 @@ class Bank:
         if account:
             self.accounts[self.counter] = account
             self.counter += 1
-            print(account)
-        else:
-            print("Unknown account type")
+        return account
 
     def transfer(self, from_id, to_id, amount):
         if self.accounts[from_id].withdraw(amount):
@@ -130,7 +130,8 @@ if __name__ == "__main__":
             else:
                 print("Invalid account type")
                 continue
-            print("Created:", acc)
+            if acc:
+                print("Created:", acc.__str__())
 
         elif choice == "2":
             acc_id = int(input("Account ID: "))
