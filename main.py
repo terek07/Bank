@@ -197,6 +197,8 @@ class Bank:
         )
 
     def transfer(self, from_id, to_id, amount):
+        if from_id == to_id:
+            raise ValueError
         source = self._get_account(from_id)
         target = self._get_account(to_id)
 
