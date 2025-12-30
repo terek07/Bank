@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# python
+
 from abc import ABC, abstractmethod
 from datetime import datetime
 
@@ -70,7 +73,7 @@ class Account(ABC):
 class SavingsAccount(Account):
     def __init__(self, account_id, owner, capitalization_period, annual_interest_rate, withdrawal_limit):
         super().__init__(account_id, owner)
-        self.capitalization_period = capitalization_period
+        self.capitalization_periods_per_year = capitalization_period
         self.annual_interest_rate = annual_interest_rate
         self.withdrawal_limit = withdrawal_limit
 
@@ -90,7 +93,7 @@ class SavingsAccount(Account):
             f"ID: {self.account_id}\n"
             f"Owner: {self.owner}\n"
             f"Balance: {self.balance:.2f}\n"
-            f"Capitalization period: {self.capitalization_period}\n"
+            f"Capitalization periods per year: {self.capitalization_periods_per_year}\n"
             f"Annual interest rate: {self.annual_interest_rate}\n"
             f"Withdrawal limit: {self.withdrawal_limit}"
         )
@@ -168,10 +171,11 @@ class Bank:
                 kwargs["overdraft_limit"],
             )
         elif account_type == ACCOUNT_SAVINGS:
+            # expect key 'capitalization_period' to match SavingsAccount init
             account = SavingsAccount(
                 self._counter,
                 owner,
-                kwargs["capitalization_period"],
+                kwargs["capitalization_periods_per_year"],
                 kwargs["annual_interest_rate"],
                 kwargs["withdrawal_limit"],
             )
@@ -198,7 +202,7 @@ class Bank:
 
     def transfer(self, from_id, to_id, amount):
         if from_id == to_id:
-            raise ValueError
+            raise ValueError("Cannot transfer to the same account")
         source = self._get_account(from_id)
         target = self._get_account(to_id)
 
@@ -207,6 +211,48 @@ class Bank:
 
         self.transactions.append(
             Transaction(TX_TRANSFER, amount, from_id, to_id)
+        )
+
+
+# =====================
+# Interest rate calculator
+# =====================
+
+class CompoundInterestCalculator:
+    @staticmethod
+    def calculate_compound_interest(starting_capital, days, capitalization_periods_per_year, annual_interest_rate):
+        # Walidacja wejścia
+        if not isinstance(starting_capital, (int, float)):
+            raise ValueError("starting_capital must be a number")
+        if starting_capital < 0:
+            raise ValueError("starting_capital must be non-negative")
+        if not isinstance(days, int):
+            raise ValueError("days must be an integer")
+        if days < 0:
+            raise ValueError("days must be non-negative")
+        if not isinstance(capitalization_periods_per_year, int):
+            raise ValueError("capitalization_periods_per_year must be an integer")
+        if capitalization_periods_per_year <= 0:
+            raise ValueError("capitalization_periods_per_year must be positive")
+        if not isinstance(annual_interest_rate, (int, float)):
+            raise ValueError("annual_interest_rate must be a number")
+        if annual_interest_rate < 0:
+            raise ValueError("annual_interest_rate must be non-negative")
+
+        periods = (days / 365) * capitalization_periods_per_year
+        rate_per_period = annual_interest_rate / capitalization_periods_per_year / 100
+        final_amount = starting_capital * (1 + rate_per_period) ** periods
+        return final_amount
+
+    @staticmethod
+    def calculate_savings_account_compound_interest(account: SavingsAccount, days: int) -> float:
+        if not isinstance(account, SavingsAccount):
+            raise TypeError("Account must be a SavingsAccount")
+        return CompoundInterestCalculator.calculate_compound_interest(
+            starting_capital=account.balance,
+            days=days,
+            capitalization_periods_per_year=account.capitalization_periods_per_year,
+            annual_interest_rate=account.annual_interest_rate
         )
 
 
@@ -226,6 +272,7 @@ if __name__ == "__main__":
         print("4. Transfer")
         print("5. Show Accounts")
         print("6. Show Transactions")
+        print("7. Calculate Interest (Savings)")
         print("0. Exit")
 
         choice = input("Choose option: ").strip()
@@ -245,13 +292,13 @@ if __name__ == "__main__":
                         overdraft_limit=od,
                     )
                 elif acc_type == "2":
-                    cp = int(input("Capitalization period (days): "))
-                    rate = float(input("Annual interest rate: "))
+                    cp = int(input("Capitalization periods per year: "))
+                    rate = float(input("Annual interest rate (percent): "))
                     wl = int(input("Withdrawal limit: "))
                     acc = bank.create_account(
                         ACCOUNT_SAVINGS,
                         owner,
-                        capitalization_period=cp,
+                        capitalization_periods_per_year=cp,
                         annual_interest_rate=rate,
                         withdrawal_limit=wl,
                     )
@@ -285,6 +332,15 @@ if __name__ == "__main__":
                 for tx in bank.transactions:
                     print(tx)
 
+            elif choice == "7":
+                acc_id = int(input("Savings Account ID: "))
+                days = int(input("Days to calculate: "))
+                account = bank._get_account(acc_id)
+                amount = CompoundInterestCalculator.calculate_savings_account_compound_interest(account, days)
+                interest = amount - account.balance
+                print(f"Final amount after {days} days: {amount:.2f}")
+                print(f"Interest earned: {interest:.2f}")
+
             elif choice == "0":
                 print("Goodbye!")
                 break
@@ -294,5 +350,7 @@ if __name__ == "__main__":
 
         except BankError as e:
             print(f"Error: {e}")
-        except ValueError:
-            print("Invalid input format")
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+        except TypeError as e:
+            print(f"Type error: {e}")
