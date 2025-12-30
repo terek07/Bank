@@ -395,4 +395,3 @@ def test_calculate_savings_account_compound_interest_invalid_days_type():
     acc.deposit(500)
     with pytest.raises(ValueError):
         CompoundInterestCalculator.calculate_savings_account_compound_interest(acc, "30")
-
