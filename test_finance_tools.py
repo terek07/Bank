@@ -1,7 +1,9 @@
 import pytest
 
-from bank import Bank, ACCOUNT_SAVINGS, ACCOUNT_CHECKING
+from bank import ACCOUNT_SAVINGS, ACCOUNT_CHECKING
 from finance_tools import CompoundInterestCalculator
+from config_test import bank
+
 
 # =========================================================
 # CompoundInterestCalculator tests
@@ -36,8 +38,7 @@ def test_compound_interest_invalid_types_and_values():
     with pytest.raises(ValueError):
         CompoundInterestCalculator.calculate_compound_interest(1000, -10, 12, 5)
 
-def test_calculate_savings_account_compound_interest_with_account():
-    bank = Bank()
+def test_calculate_savings_account_compound_interest_with_account(bank):
     acc = bank.create_account(
         ACCOUNT_SAVINGS,
         "Tester",
@@ -50,8 +51,7 @@ def test_calculate_savings_account_compound_interest_with_account():
     expected = 1000 * (1 + 0.06 / 12) ** 12
     assert final == pytest.approx(expected, rel=1e-9)
 
-def test_calculate_savings_account_compound_interest_wrong_account_type():
-    bank = Bank()
+def test_calculate_savings_account_compound_interest_wrong_account_type(bank):
     acc = bank.create_account(
         ACCOUNT_CHECKING,
         "NotSavings",
@@ -61,8 +61,7 @@ def test_calculate_savings_account_compound_interest_wrong_account_type():
     with pytest.raises(TypeError):
         CompoundInterestCalculator.calculate_savings_account_compound_interest(acc, 30)
 
-def test_calculate_savings_account_compound_interest_invalid_days_type():
-    bank = Bank()
+def test_calculate_savings_account_compound_interest_invalid_days_type(bank):
     acc = bank.create_account(
         ACCOUNT_SAVINGS,
         "Tester2",

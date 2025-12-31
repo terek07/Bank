@@ -1,7 +1,6 @@
 import pytest
 
 from bank import (
-    Bank,
     CheckingAccount,
     SavingsAccount,
     ACCOUNT_CHECKING,
@@ -15,14 +14,13 @@ from bank import (
 
 from finance_tools import CompoundInterestCalculator
 
+from config_test import bank
 
 # =========================================================
 # Integration: Bank + Accounts + Transactions
 # =========================================================
 
-def test_checking_to_savings_full_flow():
-    bank = Bank()
-
+def test_checking_to_savings_full_flow(bank):
     checking = bank.create_account(
         ACCOUNT_CHECKING,
         "Alice",
@@ -54,8 +52,7 @@ def test_checking_to_savings_full_flow():
 # Overdraft integration
 # =========================================================
 
-def test_overdraft_is_applied_during_transfer():
-    bank = Bank()
+def test_overdraft_is_applied_during_transfer(bank):
 
     src = bank.create_account(
         ACCOUNT_CHECKING,
@@ -78,8 +75,7 @@ def test_overdraft_is_applied_during_transfer():
     assert dst.balance == 400
 
 
-def test_overdraft_limit_blocks_transfer():
-    bank = Bank()
+def test_overdraft_limit_blocks_transfer(bank):
 
     src = bank.create_account(
         ACCOUNT_CHECKING,
@@ -109,8 +105,7 @@ def test_overdraft_limit_blocks_transfer():
 # Withdrawal limit integration
 # =========================================================
 
-def test_withdrawal_limit_blocks_withdraw_even_with_funds():
-    bank = Bank()
+def test_withdrawal_limit_blocks_withdraw_even_with_funds(bank):
 
     acc = bank.create_account(
         ACCOUNT_CHECKING,
@@ -132,8 +127,7 @@ def test_withdrawal_limit_blocks_withdraw_even_with_funds():
 # State invariants
 # =========================================================
 
-def test_failed_operations_do_not_create_transactions():
-    bank = Bank()
+def test_failed_operations_do_not_create_transactions(bank):
 
     acc = bank.create_account(
         ACCOUNT_CHECKING,
@@ -151,8 +145,7 @@ def test_failed_operations_do_not_create_transactions():
     assert len(bank.transactions) == initial_tx_count
 
 
-def test_account_ids_are_unique():
-    bank = Bank()
+def test_account_ids_are_unique(bank):
 
     acc1 = bank.create_account(
         ACCOUNT_CHECKING,
@@ -174,8 +167,7 @@ def test_account_ids_are_unique():
 # Multiple accounts & transaction ordering
 # =========================================================
 
-def test_transaction_order_across_multiple_accounts():
-    bank = Bank()
+def test_transaction_order_across_multiple_accounts(bank):
 
     a = bank.create_account(
         ACCOUNT_CHECKING,
@@ -207,8 +199,7 @@ def test_transaction_order_across_multiple_accounts():
 # Integration: Finance tools + SavingsAccount
 # =========================================================
 
-def test_savings_account_interest_calculation_integration():
-    bank = Bank()
+def test_savings_account_interest_calculation_integration(bank):
 
     savings = bank.create_account(
         ACCOUNT_SAVINGS,
@@ -229,8 +220,7 @@ def test_savings_account_interest_calculation_integration():
     assert interest == pytest.approx(1061.68, rel=1e-2)
 
 
-def test_zero_interest_rate_results_in_zero_interest():
-    bank = Bank()
+def test_zero_interest_rate_results_in_zero_interest(bank):
 
     savings = bank.create_account(
         ACCOUNT_SAVINGS,

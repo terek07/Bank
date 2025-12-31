@@ -1,7 +1,6 @@
 import pytest
 
 from bank import (
-    Bank,
     CheckingAccount,
     SavingsAccount,
     ACCOUNT_CHECKING,
@@ -15,14 +14,7 @@ from bank import (
     AccountNotFoundError,
 )
 
-# =========================================================
-# Fixtures: Bank
-# =========================================================
-
-@pytest.fixture
-def bank():
-    return Bank()
-
+from config_test import bank
 
 # =========================================================
 # Fixtures: CheckingAccount variants
